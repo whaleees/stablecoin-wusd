@@ -1,0 +1,13 @@
+{
+  "programId": "DbzvMaPVGPJrGW2t16dn6sgu8rnnpXZLNiqhtZ61rUFz",
+  "wusdMint": "HfSUhHnW6FciVYqBYDGexzgwQKGkEKv3C6XYrVSCnwX1",
+  "governanceMint": "5HZwPiteHXAoAMq5qoaWp2Wp4LhzYLPs3SWrbkm7NGpD",
+  "globalState": "CHu6hpKyp3h6ibJgr7cSP752wYnMwbqkxc4qh8WxUuTN",
+  "poolRegistry": "AZ5xZAp3UefmMyZCq8NcmF5patw3u8Eqbd6JBYuuRAtG",
+  "mintAuthority": "G6sjY7mncEJ4pnoDqqU7iN8Xsw6cN7iRZ2sw5ciYRfjb",
+  "solPool": {
+    "poolPda": "2uD4sVNxt2nbnZ6mo5DVZiQDD9E7Zovz6phMW4v6FeAK",
+    "collateralVault": "6L7EidkXPPbxos3HXnLRijeNej22vDUy2KFd71bbYLxH",
+    "collateralMint": "So11111111111111111111111111111111111111112"
+  }
+}

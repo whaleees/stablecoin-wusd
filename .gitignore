@@ -1,0 +1,9 @@
+# solana test validator
+test-ledger/
+frontend/test-ledger/
+
+# logs
+*.log
+
+# rocksdb
+rocksdb/

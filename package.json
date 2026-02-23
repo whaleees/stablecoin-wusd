@@ -1,0 +1,25 @@
+{
+  "name": "wusd-setup",
+  "version": "1.0.0",
+  "description": "WUSD Protocol Setup Scripts",
+  "scripts": {
+    "setup:token": "ts-node scripts/setup-test-token.ts",
+    "setup:pyth": "ts-node scripts/mock-pyth-setup.ts",
+    "setup:price-feed": "ts-node scripts/create-mock-price-feed.ts",
+    "setup:pda": "ts-node scripts/pda-calculator.ts",
+    "setup:init": "ts-node scripts/protocol-initializer.ts",
+    "setup:price": "ts-node scripts/set-mock-price.ts",
+    "setup:all": "npm run setup:token && npm run setup:init && npm run setup:price-feed",
+    "reset": "bash scripts/full-setup.sh"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana/spl-token": "^0.4.1",
+    "@solana/web3.js": "^1.95.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
