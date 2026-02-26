@@ -14,7 +14,7 @@ import {
   NATIVE_MINT,
   createCloseAccountInstruction,
 } from "@solana/spl-token";
-import { findGlobalStatePda, findPoolRegistryPda, findPoolPda, findUserVaultPda } from "@/lib/pda";
+import { findPoolPda, findUserVaultPda } from "@/lib/pda";
 import { Anchor } from "@/lib/types/anchor";
 
 export async function withdraw(params: {
@@ -87,11 +87,8 @@ export async function withdraw(params: {
     .withdraw(sharesToBurn)
     .accounts({
       user,
-      pool: poolPda,
-      userVault: userVaultPda,
       userCollateralAccount,
       poolCollateralAccount,
-      tokenProgram: TOKEN_PROGRAM_ID,
     })
     .instruction();
 

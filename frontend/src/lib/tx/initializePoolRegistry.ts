@@ -3,11 +3,9 @@
 import { Program } from "@coral-xyz/anchor";
 import {
   PublicKey,
-  SystemProgram,
   ComputeBudgetProgram,
   Transaction,
 } from "@solana/web3.js";
-import { findPoolRegistryPda } from "@/lib/pda";
 import { Anchor } from "@/lib/types/anchor";
 
 export async function initializePoolRegistry(params: {
@@ -15,8 +13,6 @@ export async function initializePoolRegistry(params: {
   admin: PublicKey;
 }) {
   const { program, admin } = params;
-
-  const [poolRegistryPda] = findPoolRegistryPda(program.programId);
 
   const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
     units: 400_000,
@@ -26,8 +22,6 @@ export async function initializePoolRegistry(params: {
     .initializePoolRegistry()
     .accounts({
       admin,
-      poolRegistry: poolRegistryPda,
-      systemProgram: SystemProgram.programId,
     })
     .instruction();
 

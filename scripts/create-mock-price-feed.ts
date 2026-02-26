@@ -15,7 +15,7 @@ import * as fs from 'fs';
 const PRICE_ACCOUNT_SIZE = 128; // Minimal size for our mock
 
 async function main() {
-  const connection = new Connection('http://localhost:8899', 'confirmed');
+  const connection = new Connection(process.env.RPC_URL || 'https://api.devnet.solana.com', 'confirmed');
 
   // Load payer wallet
   const payerKeypair = Keypair.fromSecretKey(

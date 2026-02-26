@@ -13,7 +13,8 @@ pub fn initialize_pool(
 ) -> Result<()> {
     require!(collateral_factor > 0, StableError::InvalidParameter);
     require!(liquidation_factor > 0, StableError::InvalidParameter);
-    require!(collateral_factor > liquidation_factor, StableError::InvalidParameter);
+    // LTV (collateral_factor) must be lower than liquidation threshold
+    require!(collateral_factor < liquidation_factor, StableError::InvalidParameter);
     
     let global_state = &mut ctx.accounts.global_state;
     let pool_registry = &mut ctx.accounts.pool_registry;
@@ -75,6 +76,9 @@ pub struct InitializePool<'info> {
         mut,
         seeds = [SEED_POOL_REGISTRY],
         bump = pool_registry.bump,
+        realloc = 8 + PoolRegistry::INIT_SPACE,
+        realloc::payer = admin,
+        realloc::zero = false,
     )]
     pub pool_registry: Account<'info, PoolRegistry>,
     

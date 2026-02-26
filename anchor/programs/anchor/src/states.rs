@@ -46,17 +46,18 @@ pub struct GlobalState {
 pub struct PoolRegistry {
     pub authority: Pubkey,                
     
-    #[max_len(1)]
+    #[max_len(10)]
     pub pools: Vec<Pubkey>,               
     pub bump: u8,                         
 }
 
-/// Mock price feed for local testing
+/// Mock price feed for local testing (per collateral)
 #[account]
 #[derive(InitSpace)]
 pub struct MockPriceFeed {
-    pub price: i64,           // 8 decimals
-    pub confidence: u64,      // 8 decimals
-    pub last_update: i64,     // unix timestamp
+    pub collateral_mint: Pubkey, // 32 bytes - which collateral this price is for
+    pub price: i64,              // 8 decimals
+    pub confidence: u64,         // 8 decimals
+    pub last_update: i64,        // unix timestamp
     pub bump: u8,
 }

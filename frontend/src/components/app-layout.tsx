@@ -17,7 +17,7 @@ export function AppLayout({
 }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-      <div className="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-950">
+      <div className="flex flex-col min-h-screen bg-background">
         <AppHeader links={links} />
         <main className="flex-grow container mx-auto px-4 py-6">
           <ClusterChecker>

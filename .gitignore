@@ -1,9 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+target/
+dist/
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env*.local
+
+# Keypairs (NEVER commit private keys)
+*-keypair.json
+*.json.bak
+
 # solana test validator
 test-ledger/
 frontend/test-ledger/
+anchor/test-ledger/
 
 # logs
 *.log
 
 # rocksdb
 rocksdb/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

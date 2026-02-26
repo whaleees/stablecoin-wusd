@@ -961,6 +961,12 @@ export type Anchor = {
           }
         },
         {
+          "name": "collateralMint",
+          "docs": [
+            "The collateral mint this price feed is for"
+          ]
+        },
+        {
           "name": "mockPriceFeed",
           "writable": true,
           "pda": {
@@ -984,6 +990,10 @@ export type Anchor = {
                   101,
                   100
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "collateralMint"
               }
             ]
           }
@@ -1676,11 +1686,15 @@ export type Anchor = {
     {
       "name": "mockPriceFeed",
       "docs": [
-        "Mock price feed for local testing"
+        "Mock price feed for local testing (per collateral)"
       ],
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "collateralMint",
+            "type": "pubkey"
+          },
           {
             "name": "price",
             "type": "i64"

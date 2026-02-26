@@ -97,8 +97,8 @@ export function AccountTokens({ address }: { address: PublicKey }) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Token Holdings</h2>
-          <p className="text-neutral-500 text-sm">Your SPL tokens and their balances</p>
+          <h2 className="text-xl font-bold">Token Holdings</h2>
+          <p className="text-muted-foreground text-sm">Your SPL token balances</p>
         </div>
         <Button
           variant="outline"
@@ -123,59 +123,40 @@ export function AccountTokens({ address }: { address: PublicKey }) {
       {query.isSuccess && (
         <div>
           {query.data.length === 0 ? (
-            <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-12 border border-neutral-200 dark:border-neutral-800 text-center">
-              <Coins className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">No Tokens Found</h3>
-              <p className="text-neutral-500">You don't have any SPL tokens in this wallet yet.</p>
+            <div className="bg-card rounded-xl p-8 border border-border text-center">
+              <Coins className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <h3 className="text-lg font-bold mb-1">No Tokens</h3>
+              <p className="text-muted-foreground text-sm">No SPL tokens in this wallet.</p>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
                 {items?.map(({ account, pubkey }) => {
                   const mintAddress = account.data.parsed.info.mint
                   const balance = account.data.parsed.info.tokenAmount.uiAmount ?? 0
                   const decimals = account.data.parsed.info.tokenAmount.decimals
-                  const isWUSD = mintAddress.toLowerCase().includes('wusd')
 
                   return (
                     <div
                       key={pubkey.toString()}
-                      className="bg-white dark:bg-neutral-900 rounded-2xl p-5 border border-neutral-200 dark:border-neutral-800 hover:border-emerald-500/50 transition-all"
+                      className="bg-card rounded-xl p-4 border border-border hover:border-primary/50 transition-all flex items-center justify-between"
                     >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
                           {mintAddress.slice(0, 2).toUpperCase()}
                         </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-neutral-400 hover:text-emerald-500"
-                            onClick={() => copyMint(mintAddress)}
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
-                          <ExplorerLink
-                            path={`account/${mintAddress}`}
-                            label={
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-400 hover:text-emerald-500">
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </Button>
-                            }
-                          />
+                        <div>
+                          <p className="font-mono text-sm">{ellipsify(mintAddress, 6)}</p>
+                          <p className="text-2xl font-bold">
+                            {balance.toLocaleString(undefined, { maximumFractionDigits: decimals })}
+                          </p>
                         </div>
                       </div>
-
-                      <div className="mb-3">
-                        <p className="text-xs text-neutral-500 mb-1">Mint Address</p>
-                        <p className="font-mono text-sm truncate">{ellipsify(mintAddress, 8)}</p>
-                      </div>
-
-                      <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-3">
-                        <p className="text-xs text-neutral-500 mb-1">Balance</p>
-                        <p className="text-2xl font-bold">
-                          {balance.toLocaleString(undefined, { maximumFractionDigits: decimals })}
-                        </p>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyMint(mintAddress)}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <ExplorerLink path={`account/${mintAddress}`} label={<ExternalLink className="h-4 w-4" />} />
                       </div>
                     </div>
                   )
@@ -210,8 +191,8 @@ export function AccountTransactions({ address }: { address: PublicKey }) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Transaction History</h2>
-          <p className="text-neutral-500 text-sm">Recent transactions for this wallet</p>
+          <h2 className="text-xl font-bold">Transactions</h2>
+          <p className="text-muted-foreground text-sm">Recent activity</p>
         </div>
         <Button
           variant="outline"
@@ -233,58 +214,49 @@ export function AccountTransactions({ address }: { address: PublicKey }) {
       {query.isSuccess && (
         <div>
           {query.data.length === 0 ? (
-            <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-12 border border-neutral-200 dark:border-neutral-800 text-center">
-              <Clock className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">No Transactions</h3>
-              <p className="text-neutral-500">No transaction history found for this wallet.</p>
+            <div className="bg-card rounded-xl p-8 border border-border text-center">
+              <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <h3 className="text-lg font-bold mb-1">No Transactions</h3>
+              <p className="text-muted-foreground text-sm">No history found.</p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-              <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              <div className="divide-y divide-border">
                 {items?.map((item) => (
-                  <div key={item.signature} className="p-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+                  <div key={item.signature} className="p-3 hover:bg-secondary/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${
-                          item.err ? 'bg-red-500/10' : 'bg-emerald-500/10'
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                          item.err ? 'bg-destructive/10' : 'bg-primary/10'
                         }`}>
                           {item.err ? (
-                            <XCircle className="h-5 w-5 text-red-500" />
+                            <XCircle className="h-4 w-4 text-destructive" />
                           ) : (
-                            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                            <CheckCircle2 className="h-4 w-4 text-primary" />
                           )}
                         </div>
                         <div>
                           <ExplorerLink
                             path={`tx/${item.signature}`}
-                            label={
-                              <span className="font-mono text-sm hover:text-emerald-500 transition-colors">
-                                {ellipsify(item.signature, 12)}
-                              </span>
-                            }
+                            label={<span className="font-mono text-sm hover:text-primary">{ellipsify(item.signature, 10)}</span>}
                           />
-                          <p className="text-xs text-neutral-500 mt-0.5">
-                            <ExplorerLink path={`block/${item.slot}`} label={`Slot ${item.slot}`} />
+                          <p className="text-xs text-muted-foreground">
+                            {item.blockTime ? new Date(item.blockTime * 1000).toLocaleDateString() : '-'}
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className={`text-sm font-medium ${item.err ? 'text-red-500' : 'text-emerald-500'}`}>
-                          {item.err ? 'Failed' : 'Success'}
-                        </span>
-                        <p className="text-xs text-neutral-500 mt-0.5">
-                          {item.blockTime ? new Date(item.blockTime * 1000).toLocaleDateString() : '-'}
-                        </p>
-                      </div>
+                      <span className={`text-xs font-medium ${item.err ? 'text-destructive' : 'text-primary'}`}>
+                        {item.err ? 'Failed' : 'Success'}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
 
               {(query.data?.length ?? 0) > 5 && (
-                <div className="p-4 border-t border-neutral-100 dark:border-neutral-800 text-center">
+                <div className="p-3 border-t border-border text-center">
                   <Button variant="outline" size="sm" onClick={() => setShowAll(!showAll)}>
-                    {showAll ? 'Show Less' : `Show All (${query.data.length} transactions)`}
+                    {showAll ? 'Show Less' : `Show All (${query.data.length})`}
                   </Button>
                 </div>
               )}

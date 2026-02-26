@@ -3,11 +3,9 @@
 import { Program, BN } from "@coral-xyz/anchor";
 import {
   PublicKey,
-  SystemProgram,
   ComputeBudgetProgram,
   Transaction,
 } from "@solana/web3.js";
-import { findGlobalStatePda } from "@/lib/pda";
 import { Anchor } from "@/lib/types/anchor";
 
 export async function initializeGlobal(params: {
@@ -29,8 +27,6 @@ export async function initializeGlobal(params: {
     liquidationPenalty,
   } = params;
 
-  const [globalStatePda] = findGlobalStatePda(program.programId);
-
   const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
     units: 400_000,
   });
@@ -39,10 +35,8 @@ export async function initializeGlobal(params: {
     .initializeGlobalState(debtCeiling, stabilityFee, liquidationPenalty)
     .accounts({
       admin,
-      globalState: globalStatePda,
       stablecoinMint,
       governanceTokenMint,
-      systemProgram: SystemProgram.programId,
     })
     .instruction();
 

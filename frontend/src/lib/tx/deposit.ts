@@ -99,12 +99,8 @@ export async function deposit(params: {
     .deposit(collateralAmount)
     .accounts({
       user,
-      pool: poolPda,
-      userVault: userVaultPda,
       userCollateralAccount,
       poolCollateralAccount,
-      systemProgram: SystemProgram.programId,
-      tokenProgram: TOKEN_PROGRAM_ID,
     })
     .instruction();
 

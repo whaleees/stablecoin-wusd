@@ -6,7 +6,7 @@ const SEED_GLOBAL = Buffer.from('global_state');
 const SEED_MOCK_PRICE = Buffer.from('mock_price_feed');
 
 async function main() {
-  const connection = new Connection('http://localhost:8899', 'confirmed');
+  const connection = new Connection(process.env.RPC_URL || 'https://api.devnet.solana.com', 'confirmed');
 
   // Load admin wallet
   const adminKeypair = Keypair.fromSecretKey(

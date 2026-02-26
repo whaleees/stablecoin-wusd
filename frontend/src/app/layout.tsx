@@ -5,7 +5,7 @@ import { AppLayout } from '@/components/app-layout'
 import React from 'react'
 
 export const metadata: Metadata = {
-  title: 'WUSD Protocol',
+  title: 'WUSD',
   description: 'Decentralized stablecoin protocol on Solana',
 }
 
@@ -13,7 +13,6 @@ const links: { label: string; path: string }[] = [
   { label: 'Dashboard', path: '/' },
   { label: 'Vault', path: '/vault' },
   { label: 'Pools', path: '/pools' },
-  { label: 'Admin', path: '/instructions' },
   { label: 'Account', path: '/account' },
 ]
 

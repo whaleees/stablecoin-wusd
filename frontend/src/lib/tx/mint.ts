@@ -12,7 +12,6 @@ import {
   createAssociatedTokenAccountInstruction,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { findGlobalStatePda, findPoolRegistryPda, findPoolPda, findUserVaultPda, findMintAuthorityPda } from "@/lib/pda";
 import { Anchor } from "@/lib/types/anchor";
 
 export async function mintStable(params: {
@@ -31,12 +30,6 @@ export async function mintStable(params: {
     priceFeed,
     stableAmount,
   } = params;
-
-  const [globalStatePda] = findGlobalStatePda(program.programId);
-  const [poolRegistryPda] = findPoolRegistryPda(program.programId);
-  const [poolPda] = findPoolPda(program.programId, collateralMint);
-  const [userVaultPda] = findUserVaultPda(program.programId, user, poolPda);
-  const [mintAuthorityPda] = findMintAuthorityPda(program.programId);
 
   const userStableAccount = getAssociatedTokenAddressSync(stablecoinMint, user);
 
@@ -69,16 +62,10 @@ export async function mintStable(params: {
     .mintStable(stableAmount)
     .accounts({
       user,
-      globalState: globalStatePda,
-      poolRegistry: poolRegistryPda,
       collateralMint,
       stablecoinMint,
-      pool: poolPda,
-      userVault: userVaultPda,
       priceFeed,
       userStableAccount,
-      mintAuthority: mintAuthorityPda,
-      tokenProgram: TOKEN_PROGRAM_ID,
     })
     .instruction();
 

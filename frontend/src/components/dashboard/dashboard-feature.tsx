@@ -3,157 +3,91 @@
 import { useProtocolData, useUserVaults, PoolData } from "@/lib/hooks/useProtocolData";
 import { useProgram } from "@/lib/useProgram";
 import { Button } from "@/components/ui/button";
-import { StatCard } from "@/components/ui/stat-card";
-import { ActionCard } from "@/components/ui/action-card";
-import { LoadingState } from "@/components/ui/loading";
 import { VaultPositionCard } from "@/components/protocol/vault-position";
 import { formatAmount, formatBps } from "@/lib/format";
+import { getCollateralByMint } from "@/lib/collateral";
 import Link from "next/link";
-import {
-  Wallet,
-  TrendingUp,
-  Shield,
-  Coins,
-  ArrowRight,
-  PiggyBank,
-  Landmark,
-  AlertCircle,
-} from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 export function DashboardFeature() {
   const { ready } = useProgram();
-  const { globalState, pools, loading, initialized } = useProtocolData();
+  const { globalState, pools: allPools, loading, initialized } = useProtocolData();
   const { vaults } = useUserVaults();
 
+  const pools = allPools.filter((p) => getCollateralByMint(p.mint) !== undefined);
+
   if (!ready || loading) {
-    return <LoadingState message="Loading protocol..." />;
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+      </div>
+    );
   }
 
-  // Calculate totals
   const totalCollateral = pools.reduce(
     (sum: bigint, p: PoolData) => sum + p.totalCollateral,
     0n
   );
   const totalDebt = globalState?.totalDebt ?? 0n;
-  const activeVaults = vaults.filter((v) => v.debtAmount > 0n);
+  const activeVaults = vaults.filter((v) => v.debtAmount > 0n || v.collateralShares > 0n);
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 to-neutral-800 p-8 md:p-12">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-12 w-12 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xl">
-              W
-            </div>
-            <span className="text-2xl font-bold text-white">WUSD</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
-            Decentralized Stablecoin Protocol
-          </h1>
-          <p className="text-neutral-400 text-lg max-w-2xl mb-6">
-            Deposit collateral, mint WUSD stablecoins, and manage your positions
-            with transparent on-chain mechanics.
+      <div className="flex items-center justify-between py-4">
+        <div>
+          <h1 className="text-2xl font-bold mb-1">Dashboard</h1>
+          <p className="text-muted-foreground text-sm">
+            Mint WUSD stablecoins using multi-collateral vaults
           </p>
-          {!initialized && (
-            <div className="flex items-center gap-2 bg-amber-500/20 text-amber-400 px-4 py-2 rounded-lg w-fit">
-              <AlertCircle className="h-5 w-5" />
-              <span>Protocol not initialized. Go to Admin to set up.</span>
-            </div>
-          )}
-          {initialized && (
-            <div className="flex flex-wrap gap-3">
-              <Link href="/vault">
-                <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600">
-                  Open Vault
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/pools">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-white border-white/30 hover:bg-white/10"
-                >
-                  View Pools
-                </Button>
-              </Link>
-            </div>
-          )}
         </div>
+        {initialized && (
+          <Link href="/vault">
+            <Button className="bg-primary hover:bg-primary/90">
+              Open Vault <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </Link>
+        )}
       </div>
 
-      {/* Stats */}
+      {/* Stats Row */}
       {initialized && globalState && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            title="Total Value Locked"
-            value={formatAmount(totalCollateral)}
-            subtext="Across all pools"
-            icon={Landmark}
-            accent
-          />
-          <StatCard
-            title="Total WUSD Minted"
-            value={formatAmount(totalDebt)}
-            subtext={`Ceiling: ${formatAmount(globalState.debtCeiling)}`}
-            icon={Coins}
-          />
-          <StatCard
-            title="Active Pools"
-            value={pools.length.toString()}
-            subtext="Collateral types"
-            icon={PiggyBank}
-          />
-          <StatCard
-            title="Stability Fee"
-            value={formatBps(globalState.stabilityFee)}
-            subtext="Annual rate"
-            icon={TrendingUp}
-          />
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="bg-card rounded-lg p-4 border border-border">
+            <p className="text-muted-foreground text-xs mb-1">Total Value Locked</p>
+            <p className="text-xl font-bold">{formatAmount(totalCollateral)}</p>
+          </div>
+          <div className="bg-card rounded-lg p-4 border border-border">
+            <p className="text-muted-foreground text-xs mb-1">WUSD Minted</p>
+            <p className="text-xl font-bold">{formatAmount(totalDebt)}</p>
+          </div>
+          <div className="bg-card rounded-lg p-4 border border-border">
+            <p className="text-muted-foreground text-xs mb-1">Active Pools</p>
+            <p className="text-xl font-bold">{pools.filter((p) => p.isActive).length}</p>
+          </div>
+          <div className="bg-card rounded-lg p-4 border border-border">
+            <p className="text-muted-foreground text-xs mb-1">Stability Fee</p>
+            <p className="text-xl font-bold text-primary">{formatBps(globalState.stabilityFee)}</p>
+          </div>
+          <div className="bg-card rounded-lg p-4 border border-border">
+            <p className="text-muted-foreground text-xs mb-1">Debt Ceiling</p>
+            <p className="text-xl font-bold">{formatAmount(globalState.debtCeiling)}</p>
+          </div>
         </div>
       )}
 
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ActionCard
-            title="Manage Vault"
-            description="Deposit collateral, mint WUSD, or repay debt"
-            href="/vault"
-            icon={Wallet}
-          />
-          <ActionCard
-            title="Browse Pools"
-            description="View available collateral types and parameters"
-            href="/pools"
-            icon={Shield}
-          />
-          <ActionCard
-            title="Admin Panel"
-            description="Initialize and manage protocol settings"
-            href="/instructions"
-            icon={Landmark}
-          />
-        </div>
-      </div>
-
-      {/* User Positions */}
+      {/* Your Positions */}
       {activeVaults.length > 0 && (
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Your Positions</h2>
-            <Link href="/vault">
-              <Button variant="ghost" size="sm">
-                Manage All
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-semibold">Your Positions</h2>
+            <Link href="/vault" className="text-primary text-sm hover:underline">
+              View All
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {activeVaults.map((vault) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {activeVaults.slice(0, 6).map((vault) => {
               const pool = pools.find((p) => p.address.equals(vault.pool));
               return (
                 <VaultPositionCard
@@ -167,34 +101,65 @@ export function DashboardFeature() {
         </div>
       )}
 
-      {/* Protocol Parameters */}
-      {initialized && globalState && (
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6 border border-neutral-200 dark:border-neutral-800">
-          <h2 className="text-lg font-semibold mb-4">Protocol Parameters</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div>
-              <p className="text-sm text-neutral-500 mb-1">Debt Ceiling</p>
-              <p className="font-semibold">{formatAmount(globalState.debtCeiling)} WUSD</p>
-            </div>
-            <div>
-              <p className="text-sm text-neutral-500 mb-1">Stability Fee</p>
-              <p className="font-semibold">{formatBps(globalState.stabilityFee)}</p>
-            </div>
-            <div>
-              <p className="text-sm text-neutral-500 mb-1">Liquidation Penalty</p>
-              <p className="font-semibold text-amber-500">
-                {formatBps(globalState.liquidationPenalty)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-neutral-500 mb-1">Admin</p>
-              <p className="font-mono text-sm truncate">
-                {globalState.admin.toString().slice(0, 8)}...
-              </p>
-            </div>
-          </div>
+      {/* Available Pools */}
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-lg font-semibold">Available Collaterals</h2>
+          <Link href="/pools" className="text-primary text-sm hover:underline">
+            View Details
+          </Link>
         </div>
-      )}
+        <div className="bg-card rounded-lg border border-border overflow-hidden">
+          <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs text-muted-foreground uppercase tracking-wider border-b border-border">
+            <div className="col-span-4">Asset</div>
+            <div className="col-span-2 text-right">TVL</div>
+            <div className="col-span-2 text-right">LTV</div>
+            <div className="col-span-2 text-right">Liq. Factor</div>
+            <div className="col-span-2 text-center">Status</div>
+          </div>
+          {pools.map((pool) => {
+            const config = getCollateralByMint(pool.mint);
+            return (
+              <div
+                key={pool.address.toString()}
+                className="grid grid-cols-12 gap-4 px-4 py-3 items-center border-b border-border last:border-0 hover:bg-secondary/30 transition-colors"
+              >
+                <div className="col-span-4 flex items-center gap-3">
+                  {config?.image ? (
+                    <Image src={config.image} alt={config.symbol} width={28} height={28} className="rounded-full" />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold">
+                      {config?.symbol.slice(0, 2) || "?"}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium text-sm">{config?.symbol || "Unknown"}</p>
+                    <p className="text-xs text-muted-foreground">{config?.name || "—"}</p>
+                  </div>
+                </div>
+                <div className="col-span-2 text-right text-sm">
+                  {formatAmount(pool.totalCollateral)}
+                </div>
+                <div className="col-span-2 text-right text-sm text-primary font-medium">
+                  {formatBps(pool.collateralFactor)}
+                </div>
+                <div className="col-span-2 text-right text-sm text-destructive">
+                  {formatBps(pool.liquidationFactor)}
+                </div>
+                <div className="col-span-2 flex justify-center">
+                  <span
+                    className={`px-2 py-0.5 rounded text-xs font-medium ${
+                      pool.isActive ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
+                    }`}
+                  >
+                    {pool.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

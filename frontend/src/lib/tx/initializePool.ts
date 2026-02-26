@@ -3,7 +3,6 @@
 import { Program, BN } from "@coral-xyz/anchor";
 import {
   PublicKey,
-  SystemProgram,
   ComputeBudgetProgram,
   Transaction,
 } from "@solana/web3.js";
@@ -13,7 +12,7 @@ import {
   getAssociatedTokenAddressSync,
   createAssociatedTokenAccountInstruction,
 } from "@solana/spl-token";
-import { findGlobalStatePda, findPoolRegistryPda, findPoolPda } from "@/lib/pda";
+import { findPoolPda } from "@/lib/pda";
 import { Anchor } from "@/lib/types/anchor";
 
 export async function initializePool(params: {
@@ -33,8 +32,6 @@ export async function initializePool(params: {
     interestRateModel,
   } = params;
 
-  const [globalStatePda] = findGlobalStatePda(program.programId);
-  const [poolRegistryPda] = findPoolRegistryPda(program.programId);
   const [poolPda] = findPoolPda(program.programId, collateralMint);
 
   // Pool's ATA to hold collateral (owned by pool PDA)
@@ -66,11 +63,7 @@ export async function initializePool(params: {
     .initializePool(collateralFactor, liquidationFactor, interestRateModel)
     .accounts({
       admin,
-      globalState: globalStatePda,
-      poolRegistry: poolRegistryPda,
       collateralMint,
-      pool: poolPda,
-      systemProgram: SystemProgram.programId,
     })
     .instruction();
 

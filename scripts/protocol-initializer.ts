@@ -28,7 +28,7 @@ const COLLATERAL_FACTOR = 15000;
 const LIQUIDATION_FACTOR = 12000;
 
 async function initializeProtocol() {
-  const connection = new Connection('http://localhost:8899', 'confirmed');
+  const connection = new Connection(process.env.RPC_URL || 'https://api.devnet.solana.com', 'confirmed');
   
   const walletKeypair = Keypair.fromSecretKey(
     Uint8Array.from(

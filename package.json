@@ -9,11 +9,16 @@
     "setup:pda": "ts-node scripts/pda-calculator.ts",
     "setup:init": "ts-node scripts/protocol-initializer.ts",
     "setup:price": "ts-node scripts/set-mock-price.ts",
+    "setup:pools": "ts-node scripts/setup-multi-pools.ts",
     "setup:all": "npm run setup:token && npm run setup:init && npm run setup:price-feed",
-    "reset": "bash scripts/full-setup.sh"
+    "reset": "bash scripts/full-setup.sh",
+    "keeper": "ts-node scripts/pyth-keeper.ts",
+    "keeper:multi": "ts-node scripts/pyth-keeper-multi.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.1",
+    "@pythnetwork/hermes-client": "^2.0.0",
+    "@pythnetwork/price-service-client": "^1.9.1",
     "@solana/spl-token": "^0.4.1",
     "@solana/web3.js": "^1.95.0"
   },

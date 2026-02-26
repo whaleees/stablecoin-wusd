@@ -34,12 +34,20 @@ if ! solana cluster-version > /dev/null 2>&1; then
 fi
 echo -e "${GREEN}   ✅ Validator running: $(solana cluster-version)${NC}"
 
-# Step 3: Deploy anchor program
+# Step 3: Build and deploy anchor program
 echo ""
-echo -e "${YELLOW}3️⃣  Deploying anchor program...${NC}"
+echo -e "${YELLOW}3️⃣  Building and deploying anchor program...${NC}"
 cd /home/kresn/wusd/anchor
+anchor build 2>&1 | tail -3
 anchor deploy 2>&1 | tail -3
-echo -e "${GREEN}   ✅ Program deployed${NC}"
+echo -e "${GREEN}   ✅ Program built and deployed${NC}"
+
+# Copy IDL to frontend
+mkdir -p /home/kresn/wusd/frontend/src/lib/idl
+cp /home/kresn/wusd/anchor/target/idl/anchor.json /home/kresn/wusd/frontend/src/lib/idl/
+cp /home/kresn/wusd/anchor/target/idl/anchor.json /home/kresn/wusd/frontend/src/lib/types/
+cp /home/kresn/wusd/anchor/target/types/anchor.ts /home/kresn/wusd/frontend/src/lib/types/
+echo -e "${GREEN}   ✅ IDL copied to frontend${NC}"
 
 # Step 4: Run protocol setup
 echo ""

@@ -6,8 +6,7 @@ import {
   ComputeBudgetProgram,
   Transaction,
 } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
-import { findGlobalStatePda, findPoolRegistryPda, findPoolPda, findUserVaultPda } from "@/lib/pda";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { Anchor } from "@/lib/types/anchor";
 
 export async function repay(params: {
@@ -25,11 +24,6 @@ export async function repay(params: {
     repayAmount,
   } = params;
 
-  const [globalStatePda] = findGlobalStatePda(program.programId);
-  const [poolRegistryPda] = findPoolRegistryPda(program.programId);
-  const [poolPda] = findPoolPda(program.programId, collateralMint);
-  const [userVaultPda] = findUserVaultPda(program.programId, user, poolPda);
-
   const userStableAccount = getAssociatedTokenAddressSync(stablecoinMint, user);
 
   const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
@@ -40,14 +34,9 @@ export async function repay(params: {
     .repay(repayAmount)
     .accounts({
       user,
-      globalState: globalStatePda,
-      poolRegistry: poolRegistryPda,
       collateralMint,
       stablecoinMint,
-      pool: poolPda,
-      userVault: userVaultPda,
       userStableAccount,
-      tokenProgram: TOKEN_PROGRAM_ID,
     })
     .instruction();
 

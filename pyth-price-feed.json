@@ -1,14 +1,26 @@
-{
-  "pubkey": "2eXMeqJq3cSrMV8iic2Lmpa5UrsgzQz4TnNsLxKKU3tA",
-  "account": {
-    "lamports": 1781760,
-    "data": [
-      "AAAAAAAAAAAAAAAAAAAAAADkC1QCAAAAgJaYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-      "base64"
-    ],
-    "owner": "11111111111111111111111111111111",
-    "executable": false,
-    "rentEpoch": 0,
-    "space": 128
+[
+  {
+    "symbol": "SOL",
+    "feedId": "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+    "mint": "So11111111111111111111111111111111111111112",
+    "priceFeed": "BVugLT3P6v2xygktYJ9j3NzXsErjvBvdpLf8d9orxGBy"
+  },
+  {
+    "symbol": "wBTC",
+    "feedId": "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
+    "mint": "AqfkoaHX94VHGTeA8gcB9M6PtQEPufS5e31t3ffv4JuU",
+    "priceFeed": "GkvcSnYnqAUnUVPe3UXavL3MDRo89kqorV27a4knW1My"
+  },
+  {
+    "symbol": "wETH",
+    "feedId": "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
+    "mint": "HHcq6rR2wn6LEnAMiP3UaLNzTksEELfWayBA3bsFf3RR",
+    "priceFeed": "HY8wnGGawmdb99mzJ2SDgjuj6FRM2x3LTiPcmaMubbwT"
+  },
+  {
+    "symbol": "wSUI",
+    "feedId": "0x23d7315113f5b1d3ba7a83604c44b94d79f4fd69af77f804fc7f920a6dc65744",
+    "mint": "HyXTUixFiaLpWYgzGYm2taHVnSFbd29P7HJqzCW97xXj",
+    "priceFeed": "y4vD4c5BMKm4PqQu9oWZVbJVfJNBZPWyEajg7wTmb7R"
   }
-}
+]

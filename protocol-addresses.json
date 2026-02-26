@@ -1,13 +1,20 @@
 {
-  "programId": "DbzvMaPVGPJrGW2t16dn6sgu8rnnpXZLNiqhtZ61rUFz",
-  "wusdMint": "HfSUhHnW6FciVYqBYDGexzgwQKGkEKv3C6XYrVSCnwX1",
-  "governanceMint": "5HZwPiteHXAoAMq5qoaWp2Wp4LhzYLPs3SWrbkm7NGpD",
-  "globalState": "CHu6hpKyp3h6ibJgr7cSP752wYnMwbqkxc4qh8WxUuTN",
-  "poolRegistry": "AZ5xZAp3UefmMyZCq8NcmF5patw3u8Eqbd6JBYuuRAtG",
-  "mintAuthority": "G6sjY7mncEJ4pnoDqqU7iN8Xsw6cN7iRZ2sw5ciYRfjb",
-  "solPool": {
-    "poolPda": "2uD4sVNxt2nbnZ6mo5DVZiQDD9E7Zovz6phMW4v6FeAK",
-    "collateralVault": "6L7EidkXPPbxos3HXnLRijeNej22vDUy2KFd71bbYLxH",
-    "collateralMint": "So11111111111111111111111111111111111111112"
-  }
+  "PROGRAM_ID": "DbzvMaPVGPJrGW2t16dn6sgu8rnnpXZLNiqhtZ61rUFz",
+  "GLOBAL_STATE": "CHu6hpKyp3h6ibJgr7cSP752wYnMwbqkxc4qh8WxUuTN",
+  "POOL_REGISTRY": "AZ5xZAp3UefmMyZCq8NcmF5patw3u8Eqbd6JBYuuRAtG",
+  "SOL_MINT": "So11111111111111111111111111111111111111112",
+  "SOL_POOL": "2uD4sVNxt2nbnZ6mo5DVZiQDD9E7Zovz6phMW4v6FeAK",
+  "SOL_PRICE_FEED": "BVugLT3P6v2xygktYJ9j3NzXsErjvBvdpLf8d9orxGBy",
+  "wBTC_MINT": "AqfkoaHX94VHGTeA8gcB9M6PtQEPufS5e31t3ffv4JuU",
+  "wBTC_POOL": "HngbEZ1NxKhQXtaKzeZdzyFJDid94nBJqokQ4hNMNbxh",
+  "wBTC_PRICE_FEED": "GkvcSnYnqAUnUVPe3UXavL3MDRo89kqorV27a4knW1My",
+  "wETH_MINT": "HHcq6rR2wn6LEnAMiP3UaLNzTksEELfWayBA3bsFf3RR",
+  "wETH_POOL": "DByTKvq1TNYqHBpB8uDSEABKBNqN4MjgNE5YuUGGFAq9",
+  "wETH_PRICE_FEED": "HY8wnGGawmdb99mzJ2SDgjuj6FRM2x3LTiPcmaMubbwT",
+  "wSUI_MINT": "HyXTUixFiaLpWYgzGYm2taHVnSFbd29P7HJqzCW97xXj",
+  "wSUI_POOL": "btir7hW1j3WMRceyuEr6s7Ys4wtztu1fYPGisbUE3eH",
+  "wSUI_PRICE_FEED": "y4vD4c5BMKm4PqQu9oWZVbJVfJNBZPWyEajg7wTmb7R",
+  "HYPE_MINT": "2aXRQoYDRjSnwCwKjSxA5iR6tN4CuYheqtJbcqaYyBau",
+  "HYPE_POOL": "GAXPtL4zqL2oXd5KUVyqsYZMaZZxwEwvEwdu4VWjFiVS",
+  "HYPE_PRICE_FEED": "EnEkXP2rv1vdjtNQTWXciEHZmrvvCZhhwj3aj1uZwBzS"
 }

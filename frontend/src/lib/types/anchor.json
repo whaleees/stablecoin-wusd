@@ -955,6 +955,12 @@
           }
         },
         {
+          "name": "collateral_mint",
+          "docs": [
+            "The collateral mint this price feed is for"
+          ]
+        },
+        {
           "name": "mock_price_feed",
           "writable": true,
           "pda": {
@@ -978,6 +984,10 @@
                   101,
                   100
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "collateral_mint"
               }
             ]
           }
@@ -1670,11 +1680,15 @@
     {
       "name": "MockPriceFeed",
       "docs": [
-        "Mock price feed for local testing"
+        "Mock price feed for local testing (per collateral)"
       ],
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "collateral_mint",
+            "type": "pubkey"
+          },
           {
             "name": "price",
             "type": "i64"

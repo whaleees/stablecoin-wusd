@@ -26,7 +26,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 // Configuration
-const RPC_URL = process.env.RPC_URL || "http://127.0.0.1:8899";
+const RPC_URL = process.env.RPC_URL || "https://api.devnet.solana.com";
 const MINT_DECIMALS = 9;
 const MINT_AMOUNT = 1_000_000; // 1 million tokens
 

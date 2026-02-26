@@ -2,211 +2,135 @@
 
 import { useProtocolData, PoolData } from "@/lib/hooks/useProtocolData";
 import { useProgram } from "@/lib/useProgram";
+import { usePrices } from "@/lib/hooks/usePrices";
+import { getCollateralByMint } from "@/lib/collateral";
 import { Button } from "@/components/ui/button";
-import {
-  RefreshCw,
-  Droplets,
-  TrendingUp,
-  ArrowRight,
-  Landmark,
-  Activity,
-  Percent,
-  ArrowLeft,
-  AlertTriangle,
-  CheckCircle2,
-} from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
-
-// Modular imports
-import { LoadingState } from "@/components/ui/loading";
-import { WarningState, EmptyState } from "@/components/ui/empty-state";
-import { StatBadge } from "@/components/ui/stat-card";
+import Image from "next/image";
 import { formatAmount, formatBps } from "@/lib/format";
 
 export default function PoolsPage() {
   const { ready } = useProgram();
-  const { pools, globalState, loading, initialized, refresh } = useProtocolData();
+  const { pools, globalState, loading, initialized } = useProtocolData();
+  const { prices, loading: pricesLoading } = usePrices({ interval: 1000 });
+
+  const knownPools = pools.filter((p: PoolData) => getCollateralByMint(p.mint) !== undefined);
+  const totalTVL = knownPools.reduce((sum: bigint, p: PoolData) => sum + p.totalCollateral, 0n);
+  const activePools = knownPools.filter((p: PoolData) => p.isActive).length;
 
   if (!ready || loading) {
-    return <LoadingState message="Loading pools..." />;
-  }
-
-  if (!initialized) {
     return (
-      <WarningState
-        title="Protocol Not Initialized"
-        description="The protocol needs to be initialized before pools can be created."
-        actionLabel="Go to Admin Panel"
-        actionHref="/instructions"
-      />
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+      </div>
     );
   }
 
-  const totalTVL = pools.reduce((sum: bigint, p: PoolData) => sum + p.totalCollateral, 0n);
-  const activePools = pools.filter((p: PoolData) => p.isActive).length;
+  if (!initialized || knownPools.length === 0) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">No pools available</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto">
       {/* Header */}
-      <div>
-        <Link
-          href="/"
-          className="text-sm text-neutral-500 hover:text-emerald-500 flex items-center gap-1 mb-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Link>
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Collateral Pools</h1>
-            <p className="text-neutral-500 mt-1">
-              Browse available collateral types and their parameters
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={refresh}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold mb-1">Collateral Pools</h1>
+          <p className="text-muted-foreground text-sm">
+            {activePools} active pools • {formatAmount(totalTVL)} TVL
+          </p>
+        </div>
+        <Link href="/vault">
+          <Button className="bg-primary hover:bg-primary/90">
+            Open Vault <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
+        </Link>
+      </div>
+
+      {/* Stats Row */}
+      <div className="grid grid-cols-4 gap-3 mb-6">
+        <div className="bg-card rounded-lg p-4 border border-border">
+          <p className="text-muted-foreground text-xs mb-1">Total TVL</p>
+          <p className="text-xl font-bold">{formatAmount(totalTVL)}</p>
+        </div>
+        <div className="bg-card rounded-lg p-4 border border-border">
+          <p className="text-muted-foreground text-xs mb-1">Active Pools</p>
+          <p className="text-xl font-bold">{activePools}<span className="text-muted-foreground">/{knownPools.length}</span></p>
+        </div>
+        <div className="bg-card rounded-lg p-4 border border-border">
+          <p className="text-muted-foreground text-xs mb-1">Stability Fee</p>
+          <p className="text-xl font-bold text-primary">{globalState ? formatBps(globalState.stabilityFee) : "—"}</p>
+        </div>
+        <div className="bg-card rounded-lg p-4 border border-border">
+          <p className="text-muted-foreground text-xs mb-1">Liquidation Penalty</p>
+          <p className="text-xl font-bold text-destructive">{globalState ? formatBps(globalState.liquidationPenalty) : "—"}</p>
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-xl bg-white/20">
-              <Landmark className="h-6 w-6" />
-            </div>
-            <span className="font-medium">Total Value Locked</span>
-          </div>
-          <p className="text-4xl font-bold">{formatAmount(totalTVL)}</p>
-          <p className="text-emerald-100 text-sm mt-1">Across all pools</p>
+      {/* Pools Table */}
+      <div className="bg-card rounded-lg border border-border overflow-hidden">
+        <div className="grid grid-cols-12 gap-4 px-4 py-3 text-xs text-muted-foreground uppercase tracking-wider border-b border-border">
+          <div className="col-span-3">Collateral</div>
+          <div className="col-span-2 text-right">Price</div>
+          <div className="col-span-2 text-right">TVL</div>
+          <div className="col-span-2 text-right">LTV</div>
+          <div className="col-span-2 text-center">Status</div>
+          <div className="col-span-1"></div>
         </div>
-
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6 border border-neutral-200 dark:border-neutral-800">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-xl bg-emerald-500/10">
-              <Activity className="h-6 w-6 text-emerald-500" />
-            </div>
-            <span className="font-medium">Active Pools</span>
-          </div>
-          <p className="text-4xl font-bold">
-            {activePools}
-            <span className="text-neutral-400 text-lg font-normal">/{pools.length}</span>
-          </p>
-          <p className="text-neutral-500 text-sm mt-1">Accepting deposits</p>
-        </div>
-
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6 border border-neutral-200 dark:border-neutral-800">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-xl bg-emerald-500/10">
-              <Percent className="h-6 w-6 text-emerald-500" />
-            </div>
-            <span className="font-medium">Stability Fee</span>
-          </div>
-          <p className="text-4xl font-bold">
-            {globalState ? formatBps(globalState.stabilityFee) : "—"}
-          </p>
-          <p className="text-neutral-500 text-sm mt-1">Annual rate</p>
-        </div>
-      </div>
-
-      {/* Pools Grid */}
-      {pools.length === 0 ? (
-        <EmptyState
-          icon={Droplets}
-          title="No Pools Yet"
-          description="No collateral pools have been initialized."
-          actionLabel="Create Pool"
-          actionHref="/instructions"
-        />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {pools.map((pool: PoolData) => (
-            <div
+        {knownPools.map((pool: PoolData) => {
+          const collateral = getCollateralByMint(pool.mint)!;
+          const priceData = prices[collateral.symbol];
+          return (
+            <Link
               key={pool.address.toString()}
-              className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 hover:border-emerald-500/50 hover:shadow-lg transition-all overflow-hidden"
+              href={`/pools/${collateral.symbol}`}
+              className="grid grid-cols-12 gap-4 px-4 py-4 items-center border-b border-border last:border-0 hover:bg-secondary/30 transition-colors cursor-pointer"
             >
-              {/* Card Header */}
-              <div className="p-6 border-b border-neutral-100 dark:border-neutral-800">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold">
-                        {pool.mint.toString().slice(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">
-                          {pool.mint.toString().slice(0, 6)}...
-                        </h3>
-                        <p className="font-mono text-xs text-neutral-500">
-                          {pool.mint.toString().slice(0, 4)}...{pool.mint.toString().slice(-4)}
-                        </p>
-                      </div>
-                    </div>
+              <div className="col-span-3 flex items-center gap-3">
+                {collateral.image ? (
+                  <Image src={collateral.image} alt={collateral.symbol} width={32} height={32} className="rounded-full" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold">
+                    {collateral.symbol.slice(0, 2)}
                   </div>
-                  <div
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
-                      pool.isActive
-                        ? "bg-emerald-500/10 text-emerald-600"
-                        : "bg-red-500/10 text-red-500"
-                    }`}
-                  >
-                    {pool.isActive ? (
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                    ) : (
-                      <AlertTriangle className="h-3.5 w-3.5" />
-                    )}
-                    {pool.isActive ? "Active" : "Inactive"}
-                  </div>
+                )}
+                <div>
+                  <p className="font-medium">{collateral.symbol}</p>
+                  <p className="text-xs text-muted-foreground">{collateral.name}</p>
                 </div>
               </div>
-
-              {/* Stats */}
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-neutral-500 text-sm mb-2">
-                      <TrendingUp className="h-4 w-4" />
-                      Total Collateral
-                    </div>
-                    <p className="text-2xl font-bold">{formatAmount(pool.totalCollateral)}</p>
-                  </div>
-                  <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-neutral-500 text-sm mb-2">
-                      <Droplets className="h-4 w-4" />
-                      Total Shares
-                    </div>
-                    <p className="text-2xl font-bold">{formatAmount(pool.totalShares)}</p>
-                  </div>
-                </div>
-
-                {/* Parameters */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  <StatBadge
-                    label="Collateral Ratio"
-                    value={formatBps(pool.collateralFactor)}
-                    variant="success"
-                  />
-                  <StatBadge
-                    label="Liquidation"
-                    value={formatBps(pool.liquidationFactor)}
-                    variant="warning"
-                  />
-                </div>
-
-                {/* Action */}
-                <Link href="/vault">
-                  <Button className="w-full bg-emerald-500 hover:bg-emerald-600">
-                    Open Vault
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
+              <div className="col-span-2 text-right">
+                <span className="font-medium">
+                  ${priceData?.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "—"}
+                </span>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+              <div className="col-span-2 text-right font-medium">
+                {formatAmount(pool.totalCollateral)}
+              </div>
+              <div className="col-span-2 text-right text-primary font-medium">
+                {formatBps(pool.collateralFactor)}
+              </div>
+              <div className="col-span-2 flex justify-center">
+                <span
+                  className={`px-2 py-1 rounded text-xs font-medium ${
+                    pool.isActive ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
+                  }`}
+                >
+                  {pool.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <div className="col-span-1 flex justify-end">
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

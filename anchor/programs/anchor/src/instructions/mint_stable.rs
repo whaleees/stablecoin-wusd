@@ -5,6 +5,7 @@ use anchor_spl::token::{self, MintTo, Mint, TokenAccount, Token};
 use crate::errors::*;
 use crate::events::*;
 use crate::utils::oracle::*;
+use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
 
 pub fn mint_stable(ctx: Context<MintStable>, stable_amount: u64) -> Result<()> {
     require!(stable_amount > 0, StableError::InvalidParameter);
@@ -31,11 +32,55 @@ pub fn mint_stable(ctx: Context<MintStable>, stable_amount: u64) -> Result<()> {
         StableError::DebtCeilingReached
     );
 
-    // get collateral price from oracle using your parse_pyth_price function
-    let price_data = ctx.accounts.price_feed.data.borrow();
-    let (price, _confidence) = parse_pyth_price(&price_data)?;
-    
-    msg!("DEBUG: price from oracle = {}", price);
+    // Get price from oracle - try MockPriceFeed first, then Pyth PriceUpdateV2
+    let (price, _confidence) = {
+        let price_data = ctx.accounts.price_feed.data.borrow();
+        
+        match parse_pyth_price(&price_data) {
+            Ok((p, c)) => {
+                msg!("DEBUG: Using MockPriceFeed, price = {}", p);
+                (p, c)
+            },
+            Err(_) => {
+                // Not a mock feed, try Pyth PriceUpdateV2
+                // PriceUpdateV2 uses Anchor's discriminator (first 8 bytes)
+                // Then we can use borsh to deserialize the rest
+                
+                let feed_id = get_feed_id_from_hex(SOL_USD_FEED_ID)
+                    .map_err(|_| StableError::InvalidOracle)?;
+                
+                // Try to deserialize as PriceUpdateV2
+                let mut data_slice: &[u8] = &price_data;
+                let price_update = PriceUpdateV2::try_deserialize(&mut data_slice)
+                    .map_err(|_| StableError::InvalidOracle)?;
+                
+                let clock = Clock::get()?;
+                let pyth_price = price_update
+                    .get_price_no_older_than(&clock, MAXIMUM_AGE, &feed_id)
+                    .map_err(|_| StableError::InvalidOracle)?;
+                
+                // Pyth price is in format: price * 10^exponent
+                // Normalize to 8 decimals for our calculations
+                let exponent = pyth_price.exponent;
+                let scale = 8 + exponent;
+                
+                let normalized_price = if scale >= 0 {
+                    pyth_price.price.checked_mul(10i64.pow(scale as u32)).unwrap_or(pyth_price.price)
+                } else {
+                    pyth_price.price.checked_div(10i64.pow((-scale) as u32)).unwrap_or(pyth_price.price)
+                };
+                
+                let normalized_conf = if scale >= 0 {
+                    pyth_price.conf.checked_mul(10u64.pow(scale as u32)).unwrap_or(pyth_price.conf)
+                } else {
+                    pyth_price.conf.checked_div(10u64.pow((-scale) as u32)).unwrap_or(pyth_price.conf)
+                };
+                
+                msg!("DEBUG: Using Pyth PriceUpdateV2, price = {}, exponent = {}", normalized_price, exponent);
+                (normalized_price, normalized_conf)
+            }
+        }
+    };
     
     // calculate user's collateral amount (in tokens) using u128 to prevent overflow
     let user_collateral_amount = ((user_vault.collateral_shares as u128)

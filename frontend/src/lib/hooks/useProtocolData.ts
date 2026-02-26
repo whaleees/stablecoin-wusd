@@ -13,7 +13,7 @@ export interface GlobalStateData {
   debtCeiling: bigint;
   stabilityFee: bigint;
   liquidationPenalty: bigint;
-  pools: PublicKey[];
+  poolCount: bigint;
   bump: number;
 }
 
@@ -67,7 +67,7 @@ export function useProtocolData() {
           debtCeiling: BigInt(gs.debtCeiling.toString()),
           stabilityFee: BigInt(gs.stabilityFee.toString()),
           liquidationPenalty: BigInt(gs.liquidationPenalty.toString()),
-          pools: gs.pools,
+          poolCount: BigInt(gs.poolCount.toString()),
           bump: gs.bump,
         });
       }

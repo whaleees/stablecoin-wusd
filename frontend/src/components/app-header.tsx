@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Menu, X, Wallet, TrendingUp, Landmark, Shield, User, Settings } from 'lucide-react'
+import { Menu, X, Wallet, TrendingUp, Shield, User, Settings } from 'lucide-react'
 import { ThemeSelect } from '@/components/theme-select'
 import { ClusterUiSelect } from './cluster/cluster-ui'
 import { WalletButton } from '@/components/solana/solana-provider'
@@ -25,17 +25,17 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 justify-between items-center">
+        <div className="flex h-14 justify-between items-center">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow">
-              W
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-emerald-500 to-emerald-600 bg-clip-text text-transparent">
-              WUSD
-            </span>
+          <Link href="/" className="flex items-center gap-2 group">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="text-primary">
+              <rect width="32" height="32" rx="8" fill="currentColor" />
+              <path d="M8 10L11 22H13L16 14L19 22H21L24 10H22L20 18L17 10H15L12 18L10 10H8Z" fill="var(--background)" />
+              <circle cx="16" cy="22" r="2" fill="var(--background)" />
+            </svg>
+            <span className="text-lg font-bold text-primary">WUSD</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -48,10 +48,10 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
                   <li key={path}>
                     <Link
                       href={path}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                         active 
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
-                          : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white'
+                          ? 'bg-primary/10 text-primary' 
+                          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -64,7 +64,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
           </nav>
 
           {/* Desktop Right Section */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
             <ClusterUiSelect />
             <WalletButton />
             <ThemeSelect />
@@ -84,7 +84,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
 
       {/* Mobile Menu */}
       {showMenu && (
-        <div className="md:hidden fixed inset-x-0 top-16 bottom-0 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-xl z-50">
+        <div className="md:hidden fixed inset-x-0 top-14 bottom-0 bg-background/95 backdrop-blur-xl z-50">
           <div className="container mx-auto p-4">
             <nav className="space-y-2">
               {links.map(({ label, path }) => {
@@ -97,8 +97,8 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
                     onClick={() => setShowMenu(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${
                       active 
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
-                        : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900'
+                        ? 'bg-primary/10 text-primary' 
+                        : 'text-muted-foreground hover:bg-secondary'
                     }`}
                   >
                     <Icon className="h-5 w-5" />
@@ -107,7 +107,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
                 )
               })}
             </nav>
-            <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-800 space-y-3">
+            <div className="mt-6 pt-6 border-t border-border space-y-3">
               <WalletButton />
               <div className="flex items-center gap-3">
                 <ClusterUiSelect />

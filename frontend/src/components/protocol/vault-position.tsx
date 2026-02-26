@@ -1,10 +1,11 @@
 "use client";
 
 import { UserVaultData, PoolData } from "@/lib/hooks/useProtocolData";
+import { getCollateralByMint } from "@/lib/collateral";
 import { formatAmount } from "@/lib/format";
-import { HealthBadge } from "./health-indicator";
-import { Coins, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
 
 interface VaultPositionCardProps {
   vault: UserVaultData;
@@ -13,37 +14,48 @@ interface VaultPositionCardProps {
 }
 
 export function VaultPositionCard({ vault, pool, className }: VaultPositionCardProps) {
+  const collateral = pool ? getCollateralByMint(pool.mint) : undefined;
+  const symbol = collateral?.symbol || "Unknown";
+  const image = collateral?.image;
+  
   const collateralValue = Number(vault.collateralShares);
   const debtValue = Number(vault.debtAmount);
-  const ratio = debtValue > 0 ? (collateralValue / debtValue) * 100 : 0;
+  const hasDebt = debtValue > 0;
 
   return (
-    <div
+    <Link
+      href="/vault"
       className={cn(
-        "bg-white dark:bg-neutral-900 rounded-xl p-5 border border-neutral-200 dark:border-neutral-800",
+        "bg-card rounded-lg p-4 border border-border hover:border-primary/50 transition-colors block",
         className
       )}
     >
-      <div className="flex justify-between items-start mb-4">
-        <p className="font-mono text-sm text-neutral-500">
-          {pool?.mint.toString().slice(0, 6) ?? "Unknown"}...
-          {pool?.mint.toString().slice(-4) ?? ""}
-        </p>
-        {debtValue > 0 && <HealthBadge ratio={ratio} />}
+      <div className="flex items-center gap-3 mb-3">
+        {image ? (
+          <Image src={image} alt={symbol} width={28} height={28} className="rounded-full" />
+        ) : (
+          <div className="h-7 w-7 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+            {symbol.slice(0, 2)}
+          </div>
+        )}
+        <span className="font-medium">{symbol}</span>
+        {hasDebt && (
+          <span className="ml-auto px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
+            Active
+          </span>
+        )}
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 text-sm">
         <div>
-          <p className="text-xs text-neutral-500 mb-1">Collateral</p>
-          <p className="font-semibold">{formatAmount(vault.collateralShares)}</p>
+          <p className="text-muted-foreground text-xs mb-1">Collateral</p>
+          <p className="font-medium">{formatAmount(vault.collateralShares)}</p>
         </div>
         <div>
-          <p className="text-xs text-neutral-500 mb-1">Debt</p>
-          <p className="font-semibold text-amber-500">
-            {formatAmount(vault.debtAmount)} WUSD
-          </p>
+          <p className="text-muted-foreground text-xs mb-1">Debt</p>
+          <p className="font-medium">{formatAmount(vault.debtAmount)} <span className="text-muted-foreground">WUSD</span></p>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -56,43 +68,22 @@ interface VaultStatsProps {
 export function VaultStats({ vault, pool, className }: VaultStatsProps) {
   if (!vault) {
     return (
-      <div className={cn("text-center py-8 bg-white dark:bg-neutral-800 rounded-xl", className)}>
-        <Coins className="h-10 w-10 text-neutral-400 mx-auto mb-3" />
-        <p className="text-neutral-500 mb-1">No active position</p>
-        <p className="text-sm text-neutral-400">Deposit collateral to get started</p>
+      <div className={cn("text-center py-6 bg-card rounded-lg border border-border", className)}>
+        <p className="text-muted-foreground text-sm">No active position</p>
       </div>
     );
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
-      <div className="bg-white dark:bg-neutral-800 rounded-xl p-4">
-        <div className="flex items-center gap-2 text-neutral-500 text-sm mb-2">
-          <TrendingUp className="h-4 w-4" />
-          Collateral Deposited
-        </div>
-        <p className="text-2xl font-bold">{formatAmount(vault.collateralShares)}</p>
+    <div className={cn("grid grid-cols-2 gap-3 text-sm", className)}>
+      <div className="bg-secondary rounded-lg p-3">
+        <p className="text-muted-foreground text-xs mb-1">Collateral</p>
+        <p className="font-bold">{formatAmount(vault.collateralShares)}</p>
       </div>
-
-      <div className="bg-white dark:bg-neutral-800 rounded-xl p-4">
-        <div className="flex items-center gap-2 text-neutral-500 text-sm mb-2">
-          <Coins className="h-4 w-4" />
-          Debt Outstanding
-        </div>
-        <p className="text-2xl font-bold text-amber-500">
-          {formatAmount(vault.debtAmount)}{" "}
-          <span className="text-sm font-normal">WUSD</span>
-        </p>
+      <div className="bg-secondary rounded-lg p-3">
+        <p className="text-muted-foreground text-xs mb-1">Debt</p>
+        <p className="font-bold">{formatAmount(vault.debtAmount)} <span className="text-muted-foreground font-normal">WUSD</span></p>
       </div>
-
-      {Number(vault.accruedInterest) > 0 && (
-        <div className="flex justify-between text-sm">
-          <span className="text-neutral-500">Accrued Interest</span>
-          <span className="font-medium text-amber-500">
-            +{vault.accruedInterest.toString()}
-          </span>
-        </div>
-      )}
     </div>
   );
 }

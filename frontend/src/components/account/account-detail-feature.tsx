@@ -5,10 +5,10 @@ import { useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { ExplorerLink } from '../cluster/cluster-ui'
 import { AccountButtons, AccountTokens, AccountTransactions, useGetBalance } from './account-ui'
-import { ellipsify } from '@/lib/utils'
 import { Wallet, Copy, ExternalLink, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { UserPositions } from './user-positions'
 
 export default function AccountDetailFeature() {
   const params = useParams()
@@ -26,16 +26,15 @@ export default function AccountDetailFeature() {
   if (!address) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <p className="text-red-500">Error loading account</p>
-        </div>
+        <p className="text-destructive">Invalid address</p>
       </div>
     )
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-3xl mx-auto space-y-6">
       <AccountHeader address={address} />
+      <UserPositions />
       <AccountTokens address={address} />
       <AccountTransactions address={address} />
     </div>
@@ -52,43 +51,31 @@ function AccountHeader({ address }: { address: PublicKey }) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-3xl p-8 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-      <div className="relative z-10">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Wallet className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <p className="text-neutral-400 text-sm mb-1">Wallet Balance</p>
-              <div className="flex items-baseline gap-2">
-                <span 
-                  className="text-4xl font-bold text-white cursor-pointer hover:text-emerald-400 transition-colors"
-                  onClick={() => query.refetch()}
-                >
-                  {balance.toFixed(4)}
-                </span>
-                <span className="text-xl text-neutral-400">SOL</span>
-              </div>
-            </div>
+    <div className="bg-card rounded-xl border border-border p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
+            <Wallet className="h-6 w-6 text-primary-foreground" />
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon" onClick={() => query.refetch()} className="border-white/20 text-white hover:bg-white/10">
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-            <AccountButtons address={address} />
+          <div>
+            <p className="text-muted-foreground text-sm">Balance</p>
+            <p className="text-2xl font-bold">{balance.toFixed(4)} <span className="text-muted-foreground text-lg">SOL</span></p>
           </div>
         </div>
-
-        <div className="mt-6 flex items-center gap-3 bg-white/5 rounded-xl px-4 py-3">
-          <span className="text-neutral-400 text-sm">Address:</span>
-          <code className="text-white font-mono text-sm flex-1 truncate">{address.toString()}</code>
-          <Button variant="ghost" size="icon" onClick={copyAddress} className="text-white/60 hover:text-white hover:bg-white/10">
-            <Copy className="h-4 w-4" />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={() => query.refetch()}>
+            <RefreshCw className="h-4 w-4" />
           </Button>
-          <ExplorerLink path={`account/${address}`} label={<ExternalLink className="h-4 w-4" />} />
+          <AccountButtons address={address} />
         </div>
+      </div>
+
+      <div className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-2">
+        <code className="text-sm flex-1 truncate text-muted-foreground">{address.toString()}</code>
+        <Button variant="ghost" size="icon" onClick={copyAddress} className="h-8 w-8">
+          <Copy className="h-4 w-4" />
+        </Button>
+        <ExplorerLink path={`account/${address}`} label={<ExternalLink className="h-4 w-4" />} />
       </div>
     </div>
   )
