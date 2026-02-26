@@ -17,7 +17,7 @@ export function DashboardFeature() {
 
   const pools = allPools.filter((p) => getCollateralByMint(p.mint) !== undefined);
 
-  if (!ready || loading) {
+  if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-primary" />

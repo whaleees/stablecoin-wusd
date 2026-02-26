@@ -41,22 +41,24 @@ export interface UserVaultData {
 }
 
 export function useProtocolData() {
-  const { program, ready } = useProgram();
+  const { program, readOnlyProgram, ready, connected } = useProgram();
   const [globalState, setGlobalState] = useState<GlobalStateData | null>(null);
   const [pools, setPools] = useState<PoolData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = async () => {
-    if (!program) return;
+    // Use readOnlyProgram if wallet not connected, otherwise use program
+    const programToUse = program || readOnlyProgram;
+    if (!programToUse) return;
 
     setLoading(true);
     setError(null);
 
     try {
       // Fetch global state
-      const [globalStatePda] = findGlobalStatePda(program.programId);
-      const gs = await program.account.globalState.fetchNullable(globalStatePda);
+      const [globalStatePda] = findGlobalStatePda(programToUse.programId);
+      const gs = await programToUse.account.globalState.fetchNullable(globalStatePda);
 
       if (gs) {
         setGlobalState({
@@ -73,7 +75,7 @@ export function useProtocolData() {
       }
 
       // Fetch all pools
-      const poolAccounts = await program.account.collateralPool.all();
+      const poolAccounts = await programToUse.account.collateralPool.all();
       setPools(
         poolAccounts.map((p) => ({
           address: p.publicKey,
@@ -96,10 +98,9 @@ export function useProtocolData() {
   };
 
   useEffect(() => {
-    if (ready) {
-      refresh();
-    }
-  }, [ready, program]);
+    // Run on mount - readOnlyProgram is always available
+    refresh();
+  }, [readOnlyProgram]);
 
   return {
     globalState,

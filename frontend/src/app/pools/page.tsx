@@ -19,7 +19,7 @@ export default function PoolsPage() {
   const totalTVL = knownPools.reduce((sum: bigint, p: PoolData) => sum + p.totalCollateral, 0n);
   const activePools = knownPools.filter((p: PoolData) => p.isActive).length;
 
-  if (!ready || loading) {
+  if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-primary" />

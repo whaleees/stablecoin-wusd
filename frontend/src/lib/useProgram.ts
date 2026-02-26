@@ -18,6 +18,24 @@ export function useProgram() {
     return new PublicKey(id);
   }, []);
 
+  // Read-only provider (no wallet needed)
+  const readOnlyProvider = useMemo(() => {
+    return new anchor.AnchorProvider(
+      connection,
+      {
+        publicKey: PublicKey.default,
+        signTransaction: async () => { throw new Error("Read-only"); },
+        signAllTransactions: async () => { throw new Error("Read-only"); },
+      },
+      { commitment: "confirmed" }
+    );
+  }, [connection]);
+
+  // Read-only program for fetching data without wallet
+  const readOnlyProgram = useMemo(() => {
+    return new anchor.Program<Anchor>(idl as anchor.Idl, readOnlyProvider);
+  }, [readOnlyProvider]);
+
   const provider = useMemo(() => {
     if (!wallet) return null;
     return new anchor.AnchorProvider(connection, wallet, {
@@ -38,9 +56,11 @@ export function useProgram() {
 
   return {
     program,
+    readOnlyProgram,
     programId,
     provider,
     cluster,
     ready: !!program,
+    connected: !!wallet,
   };
 }

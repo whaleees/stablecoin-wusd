@@ -22,7 +22,7 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 type Filter = "all" | "active" | "positions";
 
 export default function VaultPage() {
-  const { program, ready } = useProgram();
+  const { program, ready, connected } = useProgram();
   const { globalState, pools: allPools, loading, initialized, refresh } = useProtocolData();
   const { vaults, refresh: refreshVaults } = useUserVaults();
 
@@ -131,7 +131,7 @@ export default function VaultPage() {
     return result;
   }, [pools, filter, search, vaults]);
 
-  if (!ready || loading) {
+  if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
