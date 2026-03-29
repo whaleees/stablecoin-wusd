@@ -3,6 +3,19 @@ import './globals.css'
 import { AppProviders } from '@/components/app-providers'
 import { AppLayout } from '@/components/app-layout'
 import React from 'react'
+import { Space_Grotesk, Instrument_Sans } from 'next/font/google'
+
+const headingFont = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-heading',
+  display: 'swap',
+})
+
+const bodyFont = Instrument_Sans({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'WUSD',
@@ -19,7 +32,7 @@ const links: { label: string; path: string }[] = [
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`antialiased`}>
+      <body className={`${headingFont.variable} ${bodyFont.variable} antialiased`}>
         <AppProviders>
           <AppLayout links={links}>{children}</AppLayout>
         </AppProviders>

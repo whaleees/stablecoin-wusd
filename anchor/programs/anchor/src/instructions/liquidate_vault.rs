@@ -34,20 +34,28 @@ pub fn liquidate_vault(
     // get current price from oracle
     let price_data = ctx.accounts.price_feed.data.borrow();
     let (price, _confidence) = parse_pyth_price(&price_data)?;
+    require!(price > 0, StableError::InvalidOracle);
+    let price_u128 = price as u128;
     
-    let collateral_amount = user_vault.collateral_shares
-        .checked_mul(pool.total_collateral)
+    let collateral_amount = ((user_vault.collateral_shares as u128)
+        .checked_mul(pool.total_collateral as u128)
         .ok_or(StableError::Overflow)?
-        .checked_div(pool.total_shares.max(1))
-        .ok_or(StableError::Overflow)?;
+        .checked_div((pool.total_shares as u128).max(1))
+        .ok_or(StableError::Overflow)?) as u64;
     
     // calculate collateral value
     let collateral_decimals = ctx.accounts.collateral_mint.decimals;
-    let collateral_value = collateral_amount
-        .checked_mul(price as u64)
+    let price_decimals: u32 = 8;
+    let stable_decimals: u32 = 6;
+
+    // Value in stablecoin base units (6 decimals), aligned with mint_stable math.
+    let collateral_value = ((collateral_amount as u128)
+        .checked_mul(price_u128)
         .ok_or(StableError::Overflow)?
-        .checked_div(10u64.pow(collateral_decimals as u32))
-        .ok_or(StableError::Overflow)?;
+        .checked_div(10u128.pow(collateral_decimals as u32))
+        .ok_or(StableError::Overflow)?
+        .checked_div(10u128.pow(price_decimals - stable_decimals))
+        .ok_or(StableError::Overflow)?) as u64;
     
     let current_time = Clock::get()?.unix_timestamp;
     let time_elapsed = current_time - user_vault.last_update;
@@ -70,11 +78,11 @@ pub fn liquidate_vault(
         .ok_or(StableError::Overflow)?;
     
     // calculate collateral ratio
-    let collateral_ratio = collateral_value
-        .checked_mul(BASIS_POINTS_DIVISOR)
+    let collateral_ratio = ((collateral_value as u128)
+        .checked_mul(BASIS_POINTS_DIVISOR as u128)
         .ok_or(StableError::Overflow)?
-        .checked_div(total_debt.max(1))
-        .ok_or(StableError::Overflow)?;
+        .checked_div((total_debt as u128).max(1))
+        .ok_or(StableError::Overflow)?) as u64;
     
     // check if vault is liquidatable
     require!(
@@ -106,25 +114,27 @@ pub fn liquidate_vault(
     
     // calculate collateral to give (with liq bonus)
     let liquidation_penalty_bps = global_state.liquidation_penalty; 
-    let collateral_value_to_take = actual_debt_to_repay
-        .checked_mul(BASIS_POINTS_DIVISOR + liquidation_penalty_bps)
+    let collateral_value_to_take = ((actual_debt_to_repay as u128)
+        .checked_mul((BASIS_POINTS_DIVISOR + liquidation_penalty_bps) as u128)
         .ok_or(StableError::Overflow)?
-        .checked_div(BASIS_POINTS_DIVISOR)
-        .ok_or(StableError::Overflow)?;
+        .checked_div(BASIS_POINTS_DIVISOR as u128)
+        .ok_or(StableError::Overflow)?) as u64;
     
     // convert value back to collateral tokens
-    let collateral_to_take = collateral_value_to_take
-        .checked_mul(10u64.pow(ctx.accounts.collateral_mint.decimals as u32))
+    let collateral_to_take = ((collateral_value_to_take as u128)
+        .checked_mul(10u128.pow(ctx.accounts.collateral_mint.decimals as u32))
         .ok_or(StableError::Overflow)?
-        .checked_div(price as u64)
-        .ok_or(StableError::Overflow)?;
+        .checked_mul(10u128.pow(price_decimals - stable_decimals))
+        .ok_or(StableError::Overflow)?
+        .checked_div(price_u128)
+        .ok_or(StableError::Overflow)?) as u64;
     
     // convert to shares
-    let shares_to_take = collateral_to_take
-        .checked_mul(pool.total_shares)
+    let shares_to_take = ((collateral_to_take as u128)
+        .checked_mul(pool.total_shares as u128)
         .ok_or(StableError::Overflow)?
-        .checked_div(pool.total_collateral)
-        .ok_or(StableError::Overflow)?;
+        .checked_div((pool.total_collateral as u128).max(1))
+        .ok_or(StableError::Overflow)?) as u64;
     
     require!(
         shares_to_take <= user_vault.collateral_shares,
@@ -238,33 +248,33 @@ pub struct LiquidateVault<'info> {
         seeds = [SEED_GLOBAL],
         bump = global_state.bump,
     )]
-    pub global_state: Account<'info, GlobalState>,
+    pub global_state: Box<Account<'info, GlobalState>>,
 
     #[account(
         seeds = [SEED_POOL_REGISTRY],
         bump = pool_registry.bump,
         constraint = pool_registry.pools.contains(&pool.key()) @ StableError::InvalidPool
     )]
-    pub pool_registry: Account<'info, PoolRegistry>,
+    pub pool_registry: Box<Account<'info, PoolRegistry>>,
     
-    pub collateral_mint: Account<'info, Mint>,
+    pub collateral_mint: Box<Account<'info, Mint>>,
 
     #[account(mut)]
-    pub stablecoin_mint: Account<'info, Mint>,
+    pub stablecoin_mint: Box<Account<'info, Mint>>,
 
     #[account(
         mut,
         seeds = [SEED_POOL, collateral_mint.key().as_ref()],
         bump
     )]
-    pub pool: Account<'info, CollateralPool>,
+    pub pool: Box<Account<'info, CollateralPool>>,
     
     #[account(
         mut,
         seeds = [SEED_VAULT, user_vault.owner.as_ref(), pool.key().as_ref()],
         bump
     )]
-    pub user_vault: Account<'info, UserVault>,
+    pub user_vault: Box<Account<'info, UserVault>>,
     
     /// CHECK: Pyth price feed account - validated by parse_pyth_price
     pub price_feed: AccountInfo<'info>,
@@ -274,21 +284,21 @@ pub struct LiquidateVault<'info> {
         constraint = liquidator_stable_account.owner == liquidator.key(),
         constraint = liquidator_stable_account.mint == stablecoin_mint.key(),
     )]
-    pub liquidator_stable_account: Account<'info, TokenAccount>,
+    pub liquidator_stable_account: Box<Account<'info, TokenAccount>>,
     
     #[account(
         mut,
         constraint = liquidator_collateral_account.owner == liquidator.key(),
         constraint = liquidator_collateral_account.mint == pool_collateral_account.mint,
     )]
-    pub liquidator_collateral_account: Account<'info, TokenAccount>,
+    pub liquidator_collateral_account: Box<Account<'info, TokenAccount>>,
     
     #[account(
         mut,
         token::mint = collateral_mint,
         token::authority = pool,
     )]
-    pub pool_collateral_account: Account<'info, TokenAccount>,
+    pub pool_collateral_account: Box<Account<'info, TokenAccount>>,
     
     pub token_program: Program<'info, Token>,
 }

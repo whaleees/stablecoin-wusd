@@ -17,15 +17,17 @@ export function AppLayout({
 }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-      <div className="flex flex-col min-h-screen bg-background">
-        <AppHeader links={links} />
-        <main className="flex-grow container mx-auto px-4 py-6">
-          <ClusterChecker>
-            <AccountChecker />
-          </ClusterChecker>
-          {children}
-        </main>
-        <AppFooter />
+      <div className="tech-grid relative min-h-screen">
+        <div className="flex min-h-screen w-full flex-col overflow-hidden">
+          <AppHeader links={links} />
+          <main className="w-full flex-grow px-4 pb-12 pt-8 md:px-8 md:pb-16 md:pt-10">
+            <ClusterChecker>
+              <AccountChecker />
+            </ClusterChecker>
+            {children}
+          </main>
+          <AppFooter />
+        </div>
       </div>
       <Toaster />
     </ThemeProvider>
